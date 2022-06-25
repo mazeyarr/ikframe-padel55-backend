@@ -24,6 +24,7 @@ type Match struct {
 	Time     time.Time `json:"time"`
 	TeamA    Team      `json:"teamA"`
 	TeamB    Team      `json:"teamB"`
+	locked   bool      `json:"locked"`
 }
 
 type TeamSelection = string
@@ -57,6 +58,7 @@ var matches = []Match{
 		TeamB: Team{
 			Results: []TeamResult{},
 		},
+		locked: false,
 	},
 }
 

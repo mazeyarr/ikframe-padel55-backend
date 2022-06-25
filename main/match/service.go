@@ -9,6 +9,8 @@ import (
 func Create(match Match) Match {
 	matches = append(matches, match)
 
+	match.locked = false
+
 	return match
 }
 
@@ -168,6 +170,10 @@ func UpdatePlayerToMatch(match *Match, request JoinMatchRequest) (*Match, error)
 	var err error
 	var teamPlayerWantsToJoin *Team
 	var playerJoining, playerErr = player.FindById(request.PlayerId)
+
+	if match.locked {
+		return match, errors.New("cannot join this match anymore, it's started or locked for another reason")
+	}
 
 	if playerErr != nil {
 		return match, playerErr

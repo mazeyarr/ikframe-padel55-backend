@@ -7,14 +7,15 @@ import (
 )
 
 func InitRoutes(router *gin.Engine) {
-	router.POST("/player", PostOnePlayer)
+	playerGroupRoute := router.Group("/player")
+	playerGroupRoute.POST("/", PostOnePlayer)
 
-	router.GET("/player", GetAllPlayer)
-	router.GET("/player/:id", GetOnePlayer)
+	playerGroupRoute.GET("/", GetAllPlayer)
+	playerGroupRoute.GET("/:id", GetOnePlayer)
 
-	router.PUT("/player/:id", PutOnePlayer)
+	playerGroupRoute.PUT("/:id", PutOnePlayer)
 
-	router.DELETE("/player/:id", DeleteOnePlayer)
+	playerGroupRoute.DELETE("/:id", DeleteOnePlayer)
 }
 
 func PostOnePlayer(c *gin.Context) {

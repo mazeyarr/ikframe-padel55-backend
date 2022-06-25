@@ -7,16 +7,18 @@ import (
 )
 
 func InitRoutes(router *gin.Engine) {
-	router.POST("/match", PostOneMatch)
+	matchGroupRoute := router.Group("/match")
 
-	router.GET("/match", GetAllMatch)
-	router.GET("/match/:id", GetOneMatch)
+	matchGroupRoute.POST("/", PostOneMatch)
 
-	router.PUT("/match/:id", PutOneMatch)
-	router.PUT("/match/:id/join", PutJoinMatch)
-	router.PUT("/match/:id/result", PutResultMatch)
+	matchGroupRoute.GET("/", GetAllMatch)
+	matchGroupRoute.GET("/:id", GetOneMatch)
 
-	router.DELETE("/match/:id", DeleteOneMatch)
+	matchGroupRoute.PUT("/:id", PutOneMatch)
+	matchGroupRoute.PUT("/:id/join", PutJoinMatch)
+	matchGroupRoute.PUT("/:id/result", PutResultMatch)
+
+	matchGroupRoute.DELETE("/:id", DeleteOneMatch)
 }
 
 func PostOneMatch(c *gin.Context) {

@@ -26,17 +26,23 @@ type Match struct {
 	TeamB    Team      `json:"teamB"`
 }
 
-type JoinTeam = int64
+type TeamSelection = string
 
 const (
-	None JoinTeam = iota
-	TeamA
-	TeamB
+	None  TeamSelection = "NONE"
+	TeamA               = "TEAM_A"
+	TeamB               = "TEAM_B"
 )
 
 type JoinMatchRequest struct {
-	PlayerId int      `json:"playerId"`
-	Team     JoinTeam `json:"team"`
+	PlayerId int           `json:"playerId"`
+	Team     TeamSelection `json:"team"`
+}
+
+type ResultMatchRequest struct {
+	PlayerId   int           `json:"playerId"`
+	Team       TeamSelection `json:"team"`
+	TeamResult TeamResult    `json:"result"`
 }
 
 var matches = []Match{
@@ -55,12 +61,5 @@ var matches = []Match{
 }
 
 func Init(router *gin.Engine) {
-	router.POST("/match", PostOneMatch)
-
-	router.GET("/match", GetAllMatch)
-	router.GET("/match/:id", GetOneMatch)
-
-	router.PUT("/match/:id", PutOneMatch)
-
-	router.DELETE("/match/:id", DeleteOneMatch)
+	InitRoutes(router)
 }

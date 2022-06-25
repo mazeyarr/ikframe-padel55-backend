@@ -6,6 +6,19 @@ import (
 	"strconv"
 )
 
+func InitRoutes(router *gin.Engine) {
+	router.POST("/match", PostOneMatch)
+
+	router.GET("/match", GetAllMatch)
+	router.GET("/match/:id", GetOneMatch)
+
+	router.PUT("/match/:id", PutOneMatch)
+	router.PUT("/match/:id/join", PutJoinMatch)
+	router.PUT("/match/:id/result", PutResultMatch)
+
+	router.DELETE("/match/:id", DeleteOneMatch)
+}
+
 func PostOneMatch(c *gin.Context) {
 	var newMatch Match
 
@@ -71,7 +84,27 @@ func PutJoinMatch(c *gin.Context) {
 		return
 	}
 
-	var match, err = UpdateAddPlayerToMatchById(id, update)
+	var match, err = UpdatePlayerToMatchById(id, update)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, match)
+}
+func PutResultMatch(c *gin.Context) {
+	var id, _ = strconv.Atoi(c.Param("id"))
+	var result ResultMatchRequest
+
+	if parseErr := c.BindJSON(&result); parseErr != nil {
+		return
+	}
+
+	var match, err = UpdateMatchResultById(id, result)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

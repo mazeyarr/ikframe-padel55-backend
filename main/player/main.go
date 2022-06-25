@@ -8,6 +8,7 @@ var players = []Player{
 	{ID: 1, Name: "Mazeyar Rezaei", Email: "mazeyarr@padel55.nl"},
 	{ID: 2, Name: "John Doe", Email: "johndoe@padel55.nl"},
 	{ID: 3, Name: "Pete Johnson", Email: "petejohnson@padel55.nl"},
+	{ID: 4, Name: "Rober James", Email: "roberjames@padel55.nl"},
 }
 
 type Player struct {
@@ -17,12 +18,5 @@ type Player struct {
 }
 
 func Init(router *gin.Engine) {
-	router.POST("/player", PostOnePlayer)
-
-	router.GET("/player", GetAllPlayer)
-	router.GET("/player/:id", GetOnePlayer)
-
-	router.PUT("/player/:id", PutOnePlayer)
-
-	router.DELETE("/player/:id", DeleteOnePlayer)
+	InitRoutes(router)
 }

@@ -6,6 +6,17 @@ import (
 	"strconv"
 )
 
+func InitRoutes(router *gin.Engine) {
+	router.POST("/player", PostOnePlayer)
+
+	router.GET("/player", GetAllPlayer)
+	router.GET("/player/:id", GetOnePlayer)
+
+	router.PUT("/player/:id", PutOnePlayer)
+
+	router.DELETE("/player/:id", DeleteOnePlayer)
+}
+
 func PostOnePlayer(c *gin.Context) {
 	var newPlayer Player
 

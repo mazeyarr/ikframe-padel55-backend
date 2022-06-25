@@ -16,6 +16,8 @@ func main() {
 		})
 	})
 
+	// TODO: Add Firebase!!
+
 	player.Init(router)
 	match.Init(router)
 

@@ -48,7 +48,7 @@ type ResultMatchRequest struct {
 	TeamResult TeamResult    `json:"result"`
 }
 
-func Init(router *gin.Engine) {
+func Init(router *gin.RouterGroup) {
 	router.Use(InitMatchService)
 
 	InitRoutes(router)

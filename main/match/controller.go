@@ -5,19 +5,19 @@ import (
 	"net/http"
 )
 
-func InitRoutes(router *gin.Engine) {
-	matchGroupRoute := router.Group("/match")
+func InitRoutes(router *gin.RouterGroup) {
+	router = router.Group("/match")
 	{
-		matchGroupRoute.POST("/", PostOneMatch)
+		router.POST("/", PostOneMatch)
 
-		matchGroupRoute.GET("/", GetAllMatch)
-		matchGroupRoute.GET("/:id", GetOneMatch)
+		router.GET("/", GetAllMatch)
+		router.GET("/:id", GetOneMatch)
 
-		matchGroupRoute.PUT("/:id", PutOneMatch)
-		matchGroupRoute.PUT("/:id/join", PutJoinMatch)
-		matchGroupRoute.PUT("/:id/result", PutResultMatch)
+		router.PUT("/:id", PutOneMatch)
+		router.PUT("/:id/join", PutJoinMatch)
+		router.PUT("/:id/result", PutResultMatch)
 
-		matchGroupRoute.DELETE("/:id", DeleteOneMatch)
+		router.DELETE("/:id", DeleteOneMatch)
 	}
 }
 

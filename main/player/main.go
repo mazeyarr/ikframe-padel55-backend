@@ -12,7 +12,7 @@ type Player struct {
 	Email string `json:"email"`
 }
 
-func Init(router *gin.Engine) {
+func Init(router *gin.RouterGroup) {
 	router.Use(InitPlayerService)
 
 	InitRoutes(router)

@@ -5,18 +5,18 @@ import (
 	"net/http"
 )
 
-func InitRoutes(gin *gin.Engine) {
-	playerGroupRoute := gin.Group("/player")
+func InitRoutes(router *gin.RouterGroup) {
+	router = router.Group("/player")
 	{
-		playerGroupRoute.POST("/", PostOnePlayer)
+		router.POST("/", PostOnePlayer)
 
-		playerGroupRoute.GET("/", GetAllPlayer)
-		playerGroupRoute.GET("/email/:email", GetOnePlayerByEmail)
-		playerGroupRoute.GET("/:id", GetOnePlayer)
+		router.GET("/", GetAllPlayer)
+		router.GET("/email/:email", GetOnePlayerByEmail)
+		router.GET("/:id", GetOnePlayer)
 
-		playerGroupRoute.PUT("/:id", PutOnePlayer)
+		router.PUT("/:id", PutOnePlayer)
 
-		playerGroupRoute.DELETE("/:id", DeleteOnePlayer)
+		router.DELETE("/:id", DeleteOnePlayer)
 	}
 }
 

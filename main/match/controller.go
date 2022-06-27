@@ -3,27 +3,26 @@ package match
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"strconv"
 )
 
 func InitRoutes(router *gin.Engine) {
 	matchGroupRoute := router.Group("/match")
+	{
+		matchGroupRoute.POST("/", PostOneMatch)
 
-	matchGroupRoute.POST("/", PostOneMatch)
+		matchGroupRoute.GET("/", GetAllMatch)
+		matchGroupRoute.GET("/:id", GetOneMatch)
 
-	matchGroupRoute.GET("/", GetAllMatch)
-	matchGroupRoute.GET("/:id", GetOneMatch)
+		matchGroupRoute.PUT("/:id", PutOneMatch)
+		matchGroupRoute.PUT("/:id/join", PutJoinMatch)
+		matchGroupRoute.PUT("/:id/result", PutResultMatch)
 
-	matchGroupRoute.PUT("/:id", PutOneMatch)
-	matchGroupRoute.PUT("/:id/join", PutJoinMatch)
-	matchGroupRoute.PUT("/:id/result", PutResultMatch)
-
-	matchGroupRoute.DELETE("/:id", DeleteOneMatch)
+		matchGroupRoute.DELETE("/:id", DeleteOneMatch)
+	}
 }
 
 func PostOneMatch(c *gin.Context) {
 	var newMatch Match
-
 	if err := c.BindJSON(&newMatch); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -32,17 +31,7 @@ func PostOneMatch(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, Create(newMatch))
-}
-
-func GetAllMatch(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, FindAll())
-}
-
-func GetOneMatch(c *gin.Context) {
-	var id, _ = strconv.Atoi(c.Param("id"))
-	var match, err = FindById(id)
-
+	var match, err = Create(newMatch)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -51,14 +40,37 @@ func GetOneMatch(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusBadRequest, match)
+	c.JSON(http.StatusCreated, match)
+}
+
+func GetAllMatch(c *gin.Context) {
+	matches, err := FindAll()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, matches)
+}
+
+func GetOneMatch(c *gin.Context) {
+	var match, err = FindById(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, match)
 }
 
 func PutOneMatch(c *gin.Context) {
-	var id, _ = strconv.Atoi(c.Param("id"))
-	var match, fetchErr = FindById(id)
-	var update Match
-
+	var match, fetchErr = FindById(c.Param("id"))
 	if fetchErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": fetchErr.Error(),
@@ -67,7 +79,12 @@ func PutOneMatch(c *gin.Context) {
 		return
 	}
 
-	var updatedMatch, err = Update(match, update)
+	var update *Match
+	if err := c.BindJSON(&update); err != nil {
+		return
+	}
+
+	var updatedMatch, err = UpdateBasicFields(match, update)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -79,15 +96,12 @@ func PutOneMatch(c *gin.Context) {
 }
 
 func PutJoinMatch(c *gin.Context) {
-	var id, _ = strconv.Atoi(c.Param("id"))
 	var update JoinMatchRequest
-
 	if parseErr := c.BindJSON(&update); parseErr != nil {
 		return
 	}
 
-	var match, err = UpdatePlayerToMatchById(id, update)
-
+	var match, err = UpdatePlayerToMatchById(c.Param("id"), update)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -99,15 +113,12 @@ func PutJoinMatch(c *gin.Context) {
 	c.JSON(http.StatusOK, match)
 }
 func PutResultMatch(c *gin.Context) {
-	var id, _ = strconv.Atoi(c.Param("id"))
 	var result ResultMatchRequest
-
 	if parseErr := c.BindJSON(&result); parseErr != nil {
 		return
 	}
 
-	var match, err = UpdateMatchResultById(id, result)
-
+	var match, err = UpdateMatchResultById(c.Param("id"), result)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),
@@ -120,10 +131,7 @@ func PutResultMatch(c *gin.Context) {
 }
 
 func DeleteOneMatch(c *gin.Context) {
-	var id, _ = strconv.Atoi(c.Param("id"))
-
-	err := DeleteById(id)
-
+	err := DeleteById(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

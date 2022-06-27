@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const CollectionMatch = "Match"
+
 type TeamResult struct {
 	Set   int `json:"set"`
 	Score int `json:"score"`
@@ -18,13 +20,13 @@ type Team struct {
 }
 
 type Match struct {
-	ID       int       `json:"id"`
+	ID       string    `json:"id"`
 	Club     string    `json:"club"`
 	Location string    `json:"location"`
 	Time     time.Time `json:"time"`
 	TeamA    Team      `json:"teamA"`
 	TeamB    Team      `json:"teamB"`
-	locked   bool      `json:"locked"`
+	Locked   bool      `json:"locked"`
 }
 
 type TeamSelection = string
@@ -36,32 +38,18 @@ const (
 )
 
 type JoinMatchRequest struct {
-	PlayerId int           `json:"playerId"`
+	PlayerId string        `json:"playerId"`
 	Team     TeamSelection `json:"team"`
 }
 
 type ResultMatchRequest struct {
-	PlayerId   int           `json:"playerId"`
+	PlayerId   string        `json:"playerId"`
 	Team       TeamSelection `json:"team"`
 	TeamResult TeamResult    `json:"result"`
 }
 
-var matches = []Match{
-	{
-		ID:       1,
-		Club:     "B. Amsterdam",
-		Location: "Johan Huizingalaan 768A",
-		Time:     time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
-		TeamA: Team{
-			Results: []TeamResult{},
-		},
-		TeamB: Team{
-			Results: []TeamResult{},
-		},
-		locked: false,
-	},
-}
-
 func Init(router *gin.Engine) {
+	router.Use(InitMatchService)
+
 	InitRoutes(router)
 }

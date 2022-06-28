@@ -71,7 +71,7 @@ func GetOneMatch(c *gin.Context) {
 }
 
 func GetOneMatchByPlayer(c *gin.Context) {
-	var match, err = FindByPlayerId(c.Param("id"))
+	var match, err = FindPlayerMatchesByPlayerId(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

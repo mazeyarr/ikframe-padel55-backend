@@ -8,6 +8,7 @@ import (
 	"log"
 	"padel-backend/main/db"
 	"padel-backend/main/util"
+	"sync"
 )
 
 var Context *gin.Context
@@ -93,19 +94,94 @@ func FindById(ID string) (*Match, error) {
 	return &match, errors.New("match could not be found")
 }
 
-func FindByPlayerId(ID string) (*[]Match, error) {
-	firestore, _ := db.GetFirestore()
-	defer firestore.Close()
+func FindPlayerMatchesByPlayerId(ID string) (*[]Match, error) {
+	var wg = sync.WaitGroup{}
+
+	wg.Add(4)
 
 	var matches []Match
 
+	go func() {
+		ms, err := FindPlayerMatchesByPath("TeamA.Player1.ID", ID)
+		if err != nil {
+			log.Printf("%v %v", util.
+				GetLogPrefix("MatchService", "FindPlayerMatchesByPlayerId"), err)
+			wg.Done()
+
+			return
+		}
+
+		for _, m := range *ms {
+			matches = append(matches, m)
+		}
+
+		wg.Done()
+	}()
+
+	go func() {
+		ms, err := FindPlayerMatchesByPath("TeamA.Player2.ID", ID)
+		if err != nil {
+			log.Printf("%v %v", util.
+				GetLogPrefix("MatchService", "FindPlayerMatchesByPlayerId"), err)
+			wg.Done()
+
+			return
+		}
+
+		for _, m := range *ms {
+			matches = append(matches, m)
+		}
+
+		wg.Done()
+	}()
+
+	go func() {
+		ms, err := FindPlayerMatchesByPath("TeamB.Player1.ID", ID)
+		if err != nil {
+			log.Printf("%v %v", util.
+				GetLogPrefix("MatchService", "FindPlayerMatchesByPlayerId"), err)
+			wg.Done()
+
+			return
+		}
+
+		for _, m := range *ms {
+			matches = append(matches, m)
+		}
+
+		wg.Done()
+	}()
+
+	go func() {
+		ms, err := FindPlayerMatchesByPath("TeamB.Player2.ID", ID)
+		if err != nil {
+			log.Printf("%v %v", util.
+				GetLogPrefix("MatchService", "FindPlayerMatchesByPlayerId"), err)
+			wg.Done()
+
+			return
+		}
+
+		for _, m := range *ms {
+			matches = append(matches, m)
+		}
+
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	return &matches, nil
+}
+
+func FindPlayerMatchesByPath(path, ID string) (*[]Match, error) {
+	firestore, _ := db.GetFirestore()
+	defer firestore.Close()
+
+	var ms []Match
+
 	colRef := firestore.Collection(CollectionMatch)
-
-	query := colRef.Where("TeamA.Player1.Id", "==", ID)
-	query.Where("TeamA.Player2.Id", "==", ID)
-
-	query.Where("TeamB.Player1.Id", "==", ID)
-	query.Where("TeamB.Player2.Id", "==", ID)
+	query := colRef.Query.Where(path, "==", ID)
 
 	iter := query.Documents(Context)
 	for {
@@ -115,22 +191,20 @@ func FindByPlayerId(ID string) (*[]Match, error) {
 		}
 		if err != nil {
 			log.Printf("%v %v", util.GetLogPrefix("MatchService", "Update"), err)
-			return &matches, errors.New("match not found")
+			return &ms, errors.New("match not found")
 		}
 
 		var m Match
 		err = doc.DataTo(&m)
 		if err != nil {
 			log.Printf("%v %v", util.GetLogPrefix("MatchService", "Update"), err)
-			return &matches, errors.New("match could not be transformed to type")
+			return &ms, errors.New("match could not be transformed to type")
 		}
 
-		matches = append(matches, m)
-
-		return &matches, nil
+		ms = append(ms, m)
 	}
 
-	return &matches, errors.New("no documents found for this player")
+	return &ms, nil
 }
 
 func UpdateBasicFields(match, updated *Match) (*Match, error) {

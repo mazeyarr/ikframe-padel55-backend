@@ -10,6 +10,7 @@ func InitRoutes(router *gin.RouterGroup) {
 	{
 		router.POST("/", PostOneMatch)
 
+		router.GET("/player/:id", GetOneMatchByPlayer)
 		router.GET("/", GetAllMatch)
 		router.GET("/:id", GetOneMatch)
 
@@ -58,6 +59,19 @@ func GetAllMatch(c *gin.Context) {
 
 func GetOneMatch(c *gin.Context) {
 	var match, err = FindById(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, match)
+}
+
+func GetOneMatchByPlayer(c *gin.Context) {
+	var match, err = FindByPlayerId(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": err.Error(),

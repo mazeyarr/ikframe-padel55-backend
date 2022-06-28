@@ -83,9 +83,11 @@ func FindById(ID string) (*Player, error) {
 			log.Printf("%v %v", util.GetLogPrefix("PlayerService", "FindById"), err)
 			return &player, errors.New("player could not be transformed to type")
 		}
+
+		return &player, nil
 	}
 
-	return &player, nil
+	return &player, errors.New("player could not be found")
 }
 
 func FindByEmail(Email string) (*Player, error) {

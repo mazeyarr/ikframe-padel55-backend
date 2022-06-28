@@ -12,10 +12,10 @@ import (
 func main() {
 	app := gin.Default()
 
-	middleware, err := auth.New("credentials.json", nil)
-	if err != nil {
-		panic(err)
-	}
+	//middleware, err := auth.New("credentials.json", nil)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	//Seed()
 
@@ -29,7 +29,7 @@ func main() {
 	})
 
 	authUrlRouterGroup := app.Group("/api/v1")
-	authUrlRouterGroup.Use(middleware.MiddlewareFunc())
+	//authUrlRouterGroup.Use(middleware.MiddlewareFunc())
 
 	player.Init(authUrlRouterGroup)
 	match.Init(authUrlRouterGroup)

@@ -78,17 +78,59 @@ func FindById(ID string) (*Match, error) {
 		}
 		if err != nil {
 			log.Printf("%v %v", util.GetLogPrefix("MatchService", "FindById"), err)
-			return &match, errors.New("player not found")
+			return &match, errors.New("match not found")
 		}
 
 		err = doc.DataTo(&match)
 		if err != nil {
 			log.Printf("%v %v", util.GetLogPrefix("MatchService", "FindById"), err)
-			return &match, errors.New("player could not be transformed to type")
+			return &match, errors.New("match could not be transformed to type")
 		}
+
+		return &match, nil
 	}
 
-	return &match, nil
+	return &match, errors.New("match could not be found")
+}
+
+func FindByPlayerId(ID string) (*[]Match, error) {
+	firestore, _ := db.GetFirestore()
+	defer firestore.Close()
+
+	var matches []Match
+
+	colRef := firestore.Collection(CollectionMatch)
+
+	query := colRef.Where("TeamA.Player1.Id", "==", ID)
+	query.Where("TeamA.Player2.Id", "==", ID)
+
+	query.Where("TeamB.Player1.Id", "==", ID)
+	query.Where("TeamB.Player2.Id", "==", ID)
+
+	iter := query.Documents(Context)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("%v %v", util.GetLogPrefix("MatchService", "Update"), err)
+			return &matches, errors.New("match not found")
+		}
+
+		var m Match
+		err = doc.DataTo(&m)
+		if err != nil {
+			log.Printf("%v %v", util.GetLogPrefix("MatchService", "Update"), err)
+			return &matches, errors.New("match could not be transformed to type")
+		}
+
+		matches = append(matches, m)
+
+		return &matches, nil
+	}
+
+	return &matches, errors.New("no documents found for this player")
 }
 
 func UpdateBasicFields(match, updated *Match) (*Match, error) {

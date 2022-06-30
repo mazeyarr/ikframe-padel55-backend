@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/iterator"
 	"log"
 	"padel-backend/main/firebase"
+	"padel-backend/main/player"
 	"padel-backend/main/util"
 	"sync"
 )
@@ -92,6 +93,22 @@ func FindById(ID string) (*Match, error) {
 	}
 
 	return &match, errors.New("match could not be found")
+}
+
+func FindMyMatchHistory() (*[]Match, error) {
+	var (
+		myPlayer  *player.Player
+		myMatches []Match
+	)
+	firestore, _ := firebase.GetFirestore()
+	defer firestore.Close()
+
+	myPlayer, err := player.FindMyPlayer()
+	if err != nil {
+		return &myMatches, err
+	}
+
+	return FindPlayerMatchesByPlayerId(myPlayer.ID)
 }
 
 func FindPlayerMatchesByPlayerId(ID string) (*[]Match, error) {

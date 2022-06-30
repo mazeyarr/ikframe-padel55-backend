@@ -156,7 +156,6 @@ func UpdatePlayerToMatch(match *Match, request JoinMatchRequest) (*Match, error)
 		if isInAnyTeam {
 			_, err = UpdateRemovePlayerFromTeam(teamPlayerJoined, *playerJoining)
 		}
-
 		if err != nil {
 			return match, err
 		}

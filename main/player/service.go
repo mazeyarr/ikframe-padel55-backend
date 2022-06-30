@@ -70,7 +70,7 @@ func FindMyPlayer() (*Player, error) {
 	defer firestore.Close()
 	auth, _ := firebase.GetFirebaseAuth()
 
-	token, err := auth.VerifyIDToken(context.Background(), Context.GetString(auth2.IdTokenName))
+	token, err := auth.VerifyIDToken(context.Background(), Context.GetString(auth2.OAuthToken))
 	if err != nil {
 		return &player, errors.New("player not found, token was invalid")
 	}
@@ -80,27 +80,12 @@ func FindMyPlayer() (*Player, error) {
 		return &player, errors.New("player not found, user does not exist anymore")
 	}
 
-	iter := firestore.Collection(CollectionPlayer).Where("Email", "==", user.Email).Documents(Context)
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			log.Printf("%v %v", util.GetLogPrefix("PlayerService", "FindById"), err)
-			return &player, errors.New("player not found")
-		}
-
-		err = doc.DataTo(&player)
-		if err != nil {
-			log.Printf("%v %v", util.GetLogPrefix("PlayerService", "FindById"), err)
-			return &player, errors.New("player could not be transformed to type")
-		}
-
-		return &player, nil
+	var p, pErr = FindByEmail(user.Email)
+	if err != nil {
+		return p, pErr
 	}
 
-	return &player, errors.New("player could not be found")
+	return p, nil
 }
 
 func FindById(ID string) (*Player, error) {

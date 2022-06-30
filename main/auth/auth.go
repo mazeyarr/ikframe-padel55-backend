@@ -11,6 +11,7 @@ import (
 	"google.golang.org/api/option"
 )
 
+const OAuthToken = "OAuthToken"
 const IdTokenName = "FIREBASE_ID_TOKEN"
 
 // FirebaseAuthMiddleware is middleware for Firebase Authentication
@@ -57,6 +58,7 @@ func (fam *FirebaseAuthMiddleware) MiddlewareFunc() gin.HandlerFunc {
 			return
 		}
 
+		c.Set(OAuthToken, token)
 		c.Set(IdTokenName, idToken)
 		c.Next()
 	}

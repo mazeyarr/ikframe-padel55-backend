@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 	"log"
-	"padel-backend/main/db"
+	"padel-backend/main/firebase"
 	"padel-backend/main/util"
 	"sync"
 )
@@ -18,7 +18,7 @@ func InitMatchService(c *gin.Context) {
 }
 
 func Create(match Match) (Match, error) {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	match.ID = uuid.New().String()
@@ -36,7 +36,7 @@ func Create(match Match) (Match, error) {
 }
 
 func FindAll() (*[]Match, error) {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	var matches []Match
@@ -67,7 +67,7 @@ func FindAll() (*[]Match, error) {
 
 func FindById(ID string) (*Match, error) {
 	var match Match
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	iter := firestore.Collection(CollectionMatch).Where("ID", "==", ID).Documents(Context)
@@ -175,7 +175,7 @@ func FindPlayerMatchesByPlayerId(ID string) (*[]Match, error) {
 }
 
 func FindPlayerMatchesByPath(path, ID string) (*[]Match, error) {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	var ms []Match
@@ -216,7 +216,7 @@ func UpdateBasicFields(match, updated *Match) (*Match, error) {
 }
 
 func Update(ID string, updated *Match) (*Match, error) {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	iter := firestore.Collection(CollectionMatch).Where("ID", "==", ID).Documents(Context)
@@ -280,7 +280,7 @@ func UpdatePlayerToMatchById(ID string, request JoinMatchRequest) (*Match, error
 }
 
 func DeleteById(ID string) error {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	iter := firestore.Collection(CollectionMatch).Where("ID", "==", ID).Documents(Context)

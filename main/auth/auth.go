@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-const valName = "FIREBASE_ID_TOKEN"
+const IdTokenName = "FIREBASE_ID_TOKEN"
 
 // FirebaseAuthMiddleware is middleware for Firebase Authentication
 type FirebaseAuthMiddleware struct {
@@ -57,13 +57,13 @@ func (fam *FirebaseAuthMiddleware) MiddlewareFunc() gin.HandlerFunc {
 			return
 		}
 
-		c.Set(valName, idToken)
+		c.Set(IdTokenName, idToken)
 		c.Next()
 	}
 }
 
 func ExtractClaims(c *gin.Context) *auth.Token {
-	idToken, ok := c.Get(valName)
+	idToken, ok := c.Get(IdTokenName)
 	if !ok {
 		return new(auth.Token)
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/jaswdr/faker"
 	"google.golang.org/api/iterator"
 	"math/rand"
-	"padel-backend/main/db"
+	"padel-backend/main/firebase"
 	"padel-backend/main/match"
 	"padel-backend/main/player"
 	"padel-backend/main/util"
@@ -48,7 +48,7 @@ func PlayerSeeder(limit int) {
 		})
 	}
 
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	batch := firestore.Batch()
@@ -71,7 +71,7 @@ func MatchSeeder(limit int) {
 	wg.Wait()
 	wg.Add(1)
 
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	var ps []player.Player

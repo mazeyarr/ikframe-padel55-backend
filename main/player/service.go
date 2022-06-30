@@ -1,12 +1,14 @@
 package player
 
 import (
+	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"google.golang.org/api/iterator"
 	"log"
-	"padel-backend/main/db"
+	auth2 "padel-backend/main/auth"
+	"padel-backend/main/firebase"
 	"padel-backend/main/util"
 )
 
@@ -17,7 +19,7 @@ func InitPlayerService(c *gin.Context) {
 }
 
 func Create(player Player) (Player, error) {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	player.ID = uuid.New().String()
@@ -34,7 +36,7 @@ func Create(player Player) (Player, error) {
 }
 
 func FindAll() ([]Player, error) {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	var players []Player
@@ -62,9 +64,48 @@ func FindAll() ([]Player, error) {
 	return players, nil
 }
 
+func FindMyPlayer() (*Player, error) {
+	var player Player
+	firestore, _ := firebase.GetFirestore()
+	defer firestore.Close()
+	auth, _ := firebase.GetFirebaseAuth()
+
+	token, err := auth.VerifyIDToken(context.Background(), Context.GetString(auth2.IdTokenName))
+	if err != nil {
+		return &player, errors.New("player not found, token was invalid")
+	}
+
+	user, err := auth.GetUser(context.Background(), token.UID)
+	if err != nil {
+		return &player, errors.New("player not found, user does not exist anymore")
+	}
+
+	iter := firestore.Collection(CollectionPlayer).Where("Email", "==", user.Email).Documents(Context)
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Printf("%v %v", util.GetLogPrefix("PlayerService", "FindById"), err)
+			return &player, errors.New("player not found")
+		}
+
+		err = doc.DataTo(&player)
+		if err != nil {
+			log.Printf("%v %v", util.GetLogPrefix("PlayerService", "FindById"), err)
+			return &player, errors.New("player could not be transformed to type")
+		}
+
+		return &player, nil
+	}
+
+	return &player, errors.New("player could not be found")
+}
+
 func FindById(ID string) (*Player, error) {
 	var player Player
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	iter := firestore.Collection(CollectionPlayer).Where("ID", "==", ID).Documents(Context)
@@ -92,7 +133,7 @@ func FindById(ID string) (*Player, error) {
 
 func FindByEmail(Email string) (*Player, error) {
 	var player Player
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	iter := firestore.Collection(CollectionPlayer).Where("Email", "==", Email).Limit(1).Documents(Context)
@@ -118,7 +159,7 @@ func FindByEmail(Email string) (*Player, error) {
 }
 
 func Update(player *Player, updated Player) (*Player, error) {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	iter := firestore.Collection(CollectionPlayer).Where("ID", "==", player.ID).Documents(Context)
@@ -154,7 +195,7 @@ func Update(player *Player, updated Player) (*Player, error) {
 }
 
 func DeleteById(ID string) error {
-	firestore, _ := db.GetFirestore()
+	firestore, _ := firebase.GetFirestore()
 	defer firestore.Close()
 
 	iter := firestore.Collection(CollectionPlayer).Where("ID", "==", ID).Documents(Context)

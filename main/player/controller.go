@@ -12,6 +12,7 @@ func InitRoutes(router *gin.RouterGroup) {
 
 		router.GET("/", GetAllPlayer)
 		router.GET("/email/:email", GetOnePlayerByEmail)
+		router.GET("/me", GetMyPlayer)
 		router.GET("/:id", GetOnePlayer)
 
 		router.PUT("/:id", PutOnePlayer)
@@ -53,6 +54,19 @@ func GetAllPlayer(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, players)
+}
+
+func GetMyPlayer(c *gin.Context) {
+	var player, err = FindMyPlayer()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": err.Error(),
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, player)
 }
 
 func GetOnePlayer(c *gin.Context) {
